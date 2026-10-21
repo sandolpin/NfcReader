@@ -2,6 +2,7 @@ package com.sandolpin.nfcreader.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,10 +23,21 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.lerp
+import androidx.compose.ui.util.lerp
 import com.sandolpin.nfcreader.domain.model.CardAppearance
 import com.sandolpin.nfcreader.domain.model.HistoryEntry
 import com.sandolpin.nfcreader.util.CurrencyFormat
@@ -46,48 +58,89 @@ fun CardDetailContent(
     modifier: Modifier = Modifier,
     appearanceModifier: Modifier = Modifier
 ) {
-    LazyColumn(
-        modifier = modifier,
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 24.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+    // 縮み具合。0 = 大きいまま、1 = いちばん小さい。スクロールに合わせて変える
+    var collapse by remember { mutableFloatStateOf(0f) }
+    val collapseRangePx = with(LocalDensity.current) { COLLAPSE_SCROLL_RANGE.toPx() }
+
+    // 上へスクロール(指を上に動かす)したら、リストより先にカードを縮める。
+    // 下へスクロールして、リストが一番上まで戻ったあとの余りで、カードを大きく戻す
+    val connection = remember(collapseRangePx) {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                if (available.y >= 0f || collapse >= 1f) return Offset.Zero
+                val next = (collapse - available.y / collapseRangePx).coerceAtMost(1f)
+                val used = -(next - collapse) * collapseRangePx
+                collapse = next
+                return Offset(0f, used)
+            }
+
+            override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
+                if (available.y <= 0f || collapse <= 0f) return Offset.Zero
+                val next = (collapse - available.y / collapseRangePx).coerceAtLeast(0f)
+                val used = (collapse - next) * collapseRangePx
+                collapse = next
+                return Offset(0f, used)
+            }
+        }
+    }
+
+    Column(
+        modifier = modifier.nestedScroll(connection),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        item {
-            CardAppearanceView(
-                appearance = appearance,
-                modifier = appearanceModifier.widthIn(max = 260.dp).fillMaxWidth(0.6f)
-            )
-        }
-        item { BalanceBox(balance) }
-        item {
-            OutlinedTextField(
-                value = cardId,
-                onValueChange = {},
-                readOnly = true,
-                singleLine = true,
-                label = { Text("カードID") },
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-        item { HistoryHeader() }
+        // カードは、リストの外に固定する(スクロールで画面から消えない)。大きさだけが変わる
+        CardAppearanceView(
+            appearance = appearance,
+            modifier = appearanceModifier
+                .padding(top = 8.dp, bottom = 12.dp)
+                .widthIn(max = lerp(LARGE_MAX_WIDTH, SMALL_MAX_WIDTH, collapse))
+                .fillMaxWidth(lerp(LARGE_WIDTH_FRACTION, SMALL_WIDTH_FRACTION, collapse))
+        )
 
-        if (history.isEmpty()) {
+        LazyColumn(
+            modifier = Modifier.weight(1f),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 0.dp, bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            item { BalanceBox(balance) }
             item {
-                Text(
-                    text = "利用履歴はありません",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(vertical = 16.dp)
+                OutlinedTextField(
+                    value = cardId,
+                    onValueChange = {},
+                    readOnly = true,
+                    singleLine = true,
+                    label = { Text("カードID") },
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
-        } else {
-            itemsIndexed(history, key = { index, _ -> index }) { _, entry ->
-                HistoryItem(entry)
+            item { HistoryHeader() }
+
+            if (history.isEmpty()) {
+                item {
+                    Text(
+                        text = "利用履歴はありません",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(vertical = 16.dp)
+                    )
+                }
+            } else {
+                itemsIndexed(history, key = { index, _ -> index }) { _, entry ->
+                    HistoryItem(entry)
+                }
             }
         }
     }
 }
+
+/** カードが大きい状態から小さい状態になるまでの、スクロール量。 */
+private val COLLAPSE_SCROLL_RANGE = 180.dp
+private val LARGE_MAX_WIDTH = 380.dp
+private val SMALL_MAX_WIDTH = 190.dp
+private const val LARGE_WIDTH_FRACTION = 0.88f
+private const val SMALL_WIDTH_FRACTION = 0.46f
 
 /** 角丸の太い枠の中に「残高」と金額を並べた表示。 */
 @Composable

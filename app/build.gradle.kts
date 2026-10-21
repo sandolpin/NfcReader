@@ -25,7 +25,7 @@ android {
             isUniversalApk = false
         }
     }
-    
+
     buildTypes {
         release {
             isMinifyEnabled = true
