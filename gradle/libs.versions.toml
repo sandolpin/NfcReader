@@ -1,0 +1,51 @@
+# ------------------------------------------------------------------
+# agp / kotlin / ksp は、お使いのプロジェクトで動いている値をそのまま使うこと。
+# (Gradle 9.3.1 なら AGP 9 系。AGP 9 は Kotlin を内蔵するので kotlin-android プラグインは定義しない)
+# 既存の libs.versions.toml がある場合は、下の「--- 追加分 ---」より下だけを追記すればよい。
+# ------------------------------------------------------------------
+[versions]
+agp = "9.1.0"            # ← 9.1.0 以上が必要(core 1.19 系の要求)。Android Studio が作った元の値が新しければそちらを使う
+kotlin = "2.3.0"         # ← お使いのプロジェクトの値に合わせる(compose プラグインと同じ版)
+ksp = "2.3.4"            # ← Kotlin 2.3 以降の KSP は独自の版番号。Kotlin に対応する版を使う
+
+# --- 追加分 ---
+coreKtx = "1.19.1"       # 実際に解決されている版(compileSdk 37 と AGP 9.1.0 以上が必要)
+lifecycle = "2.8.7"
+activityCompose = "1.9.3"
+splashscreen = "1.0.1"
+composeBom = "2025.02.00"
+# Material 3 Expressive はアルファ版でのみ提供される。実装時に最新のアルファ版を確認して更新する
+material3 = "1.4.0-alpha10"
+navigationCompose = "2.8.5"
+room = "2.8.0"           # 新しい Kotlin / KSP / AGP 9 と組み合わせるため 2.6.1 から更新
+datastore = "1.1.1"
+coil = "2.7.0"
+coroutines = "1.9.0"
+junit = "4.13.2"
+
+[libraries]
+androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
+androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
+androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
+androidx-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "splashscreen" }
+androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
+androidx-compose-ui = { module = "androidx.compose.ui:ui" }
+androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
+androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
+androidx-compose-material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
+androidx-compose-material-icons = { module = "androidx.compose.material:material-icons-extended" }
+androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
+junit = { module = "junit:junit", version.ref = "junit" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

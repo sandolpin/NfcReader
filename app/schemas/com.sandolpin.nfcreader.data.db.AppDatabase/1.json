@@ -1,0 +1,174 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "3caf56c905f16ea47a37fca04047dc5d",
+    "entities": [
+      {
+        "tableName": "cards",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cardId` TEXT NOT NULL, `name` TEXT NOT NULL, `appearanceType` TEXT NOT NULL, `appearanceValue` TEXT NOT NULL, `balance` INTEGER NOT NULL, `lastUpdated` INTEGER NOT NULL, PRIMARY KEY(`cardId`))",
+        "fields": [
+          {
+            "fieldPath": "cardId",
+            "columnName": "cardId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "appearanceType",
+            "columnName": "appearanceType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "appearanceValue",
+            "columnName": "appearanceValue",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "balance",
+            "columnName": "balance",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastUpdated",
+            "columnName": "lastUpdated",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "cardId"
+          ]
+        }
+      },
+      {
+        "tableName": "histories",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cardId` TEXT NOT NULL, `position` INTEGER NOT NULL, `type` TEXT NOT NULL, `epochDay` INTEGER NOT NULL, `balanceAfter` INTEGER NOT NULL, `amount` INTEGER, `sequence` INTEGER NOT NULL, `boardRegion` INTEGER, `boardLine` INTEGER, `boardStation` INTEGER, `alightRegion` INTEGER, `alightLine` INTEGER, `alightStation` INTEGER, FOREIGN KEY(`cardId`) REFERENCES `cards`(`cardId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cardId",
+            "columnName": "cardId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epochDay",
+            "columnName": "epochDay",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "balanceAfter",
+            "columnName": "balanceAfter",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "amount",
+            "columnName": "amount",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "sequence",
+            "columnName": "sequence",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "boardRegion",
+            "columnName": "boardRegion",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "boardLine",
+            "columnName": "boardLine",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "boardStation",
+            "columnName": "boardStation",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "alightRegion",
+            "columnName": "alightRegion",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "alightLine",
+            "columnName": "alightLine",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "alightStation",
+            "columnName": "alightStation",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_histories_cardId",
+            "unique": false,
+            "columnNames": [
+              "cardId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_histories_cardId` ON `${TABLE_NAME}` (`cardId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "cards",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "cardId"
+            ],
+            "referencedColumns": [
+              "cardId"
+            ]
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3caf56c905f16ea47a37fca04047dc5d')"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- スプラッシュ。設定(テーマ)の読み込みが終わるまで維持し、起動時のちらつきを防ぐ -->
+    <style name="Theme.NfcReader.Splash" parent="Theme.SplashScreen">
+        <item name="postSplashScreenTheme">@style/Theme.NfcReader</item>
+    </style>
+
+    <!-- 画面の見た目は Compose 側のテーマで決める。ここでは、描画前に見える窓の背景だけ端末の明暗に合わせる(夜間は values-night) -->
+    <style name="Theme.NfcReader" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>
